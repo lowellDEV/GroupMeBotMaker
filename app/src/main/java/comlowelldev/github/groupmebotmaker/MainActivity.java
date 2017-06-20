@@ -66,6 +66,17 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onResume(){
+        super.onResume();
+        try {
+            InputStream response =HTTP.sendGET(GroupMe.baseURL+"/bots",new JSONObject().put("token",token));
+            populateList(response);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void populateList(InputStream response) {
         StringBuilder responseBld = new StringBuilder();
         BufferedReader read = new BufferedReader(new InputStreamReader(response));

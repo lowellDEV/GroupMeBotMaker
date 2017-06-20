@@ -7,8 +7,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -38,29 +40,54 @@ import java.util.logging.Logger;
     private String groupID;
     private String[] terms;
     private String botName;
-    private Button createBtn = (Button) findViewById(R.id.createButton);
+    private Button createBtn ;
+    private String token;
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.create_bot);
-        String token = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("token","token");
+        token = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("token","token");
+        createBtn = (Button) findViewById(R.id.createButton);
         createBtn.setEnabled(false);
         try {
             InputStream response =HTTP.sendGET(GroupMe.baseURL+"/groups",new JSONObject().put("token",token));
             populateList(response);
             //System.out.print(groupID);
             EditText botTerms=(EditText) findViewById(R.id.termsEditText);
+            botTerms.setOnFocusChangeListener(new OnFocusChangeListener() {
+                  @Override
+                  public void onFocusChange(View v, boolean hasFocus) {
+                      EditText text1  = (EditText) v;
+                      String temp =text1.getText().toString();
+                      terms =temp.split(",");
+                      runCheck();
+
+                  }
+              }
+
+            );
             EditText botNameEdit = (EditText) findViewById(R.id.nameEditText);
-            final Spinner botGroupSpinner = (Spinner) findViewById(R.id.groupSpinner);
-            //Button createBtn = (Button) findViewById(R.id.createButton);
-            botNameEdit.setOnClickListener(this);
-            botTerms.setOnClickListener(this);
-            createBtn.setOnClickListener(this);
-            botGroupSpinner.setOnItemClickListener(new OnItemClickListener() {
+            botNameEdit.setOnFocusChangeListener(new OnFocusChangeListener() {
                 @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                public void onFocusChange(View v, boolean hasFocus) {
+                    EditText text2  = (EditText) v;
+                    botName =text2.getText().toString();
+                    runCheck();
+                }
+            });
+            final Spinner botGroupSpinner = (Spinner) findViewById(R.id.groupSpinner);
+
+           // botNameEdit.setOnClickListener(this);
+            //botTerms.setOnClickListener(this);
+            createBtn.setOnClickListener(this);
+            botGroupSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     System.out.println("Selected Group: "+groupList.get(position).getGroupName());
                     groupID = groupList.get(position).getGroupID();
+                    runCheck();
+                }
+                public void onNothingSelected(AdapterView<?> parent){
                     runCheck();
                 }
             });
@@ -126,28 +153,10 @@ import java.util.logging.Logger;
 
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         Spinner sItems = (Spinner) findViewById(R.id.groupSpinner);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sItems.setAdapter(adapter);
-        /*
-        AlertDialog.Builder chooseGroup = new AlertDialog.Builder(CreateBotActivity.this);
-        LayoutInflater inflater = getLayoutInflater();
-        View convertView = (View) inflater.inflate(R.layout.layout, null);
-        chooseGroup.setView(convertView);
-        chooseGroup.setTitle("Select Group");
-        ListView lv = (ListView) convertView.findViewById(R.id.listView1);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,(List)groupList);
-        lv.setAdapter(adapter);
-        final AlertDialog show = chooseGroup.create();
-        show.show();
-        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                groupID = groupList.get(position).getGroupID();
-                System.out.println("GroupID: "+groupID);
 
-                show.cancel();
-            }
-        });
-        */
+
 
     }
 
@@ -155,19 +164,29 @@ import java.util.logging.Logger;
     public void onClick(View v) {
        switch (v.getId()){
            case R.id.createButton:
-               //create bot
-               //return to main view
+               GroupMeBot bot =GroupMeBot.createBot(token,botName,groupID);
+               if(bot!=null){
+                   bot.addTerms(terms);
+                   System.out.println(bot);
+               }else{
+                   System.err.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Bot Creation Failed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+               }
+               finish();
                break;
            case R.id.termsEditText:
-               //fill terms
+               EditText text1  = (EditText) v;
+               String temp =text1.getText().toString();
+               terms =temp.split(",");
                runCheck();
                break;
            case R.id.nameEditText:
-               //set name
+               EditText text2  = (EditText) v;
+               botName =text2.getText().toString();
                runCheck();
                break;
            default:
                System.err.println("rouge onclick");
         }
     }
+
 }

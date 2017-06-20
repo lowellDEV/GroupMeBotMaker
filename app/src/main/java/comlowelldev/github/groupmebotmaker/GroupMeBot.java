@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,6 +31,7 @@ public class GroupMeBot {
     private String callBackURL;
     private String groupName;
     private Boolean DMNotification;
+    private ArrayList<String> searchTerms;
 
     /**
      * Create a bot object
@@ -41,6 +44,7 @@ public class GroupMeBot {
         this.name = name;
         this.botID = botID;
         this.groupID = group;
+        searchTerms = new ArrayList<>();
     }
 
     /**
@@ -58,6 +62,7 @@ public class GroupMeBot {
         this.avatarURL = avatar;
         this.callBackURL = callback;
         this.DMNotification = DMNotification;
+        searchTerms = new ArrayList<>();
     }
 
     /**
@@ -217,6 +222,20 @@ public class GroupMeBot {
     }
     public String getGroupName() {
         return groupName;
+    }
+    public void addTerm(String term){
+        searchTerms.add(term);
+
+    }
+    public void addTerms(String[] terms){
+        for(String term: terms){
+            this.addTerm(term);
+        }
+    }
+    public void addTerms(List<String> terms){
+        for(String term: terms){
+            this.addTerm(term);
+        }
     }
     @Override
     public String toString(){
