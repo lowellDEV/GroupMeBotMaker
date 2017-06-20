@@ -13,6 +13,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -48,12 +51,14 @@ public class MainActivity extends AppCompatActivity {
             token = preferences.getString("token",null);
         }
         System.out.println("******************Token: "+preferences.getString("token",null));
+        /*
         try {
             InputStream response =HTTP.sendGET(GroupMe.baseURL+"/bots",new JSONObject().put("token",token));
             populateList(response);
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        */
         //groupme = new GroupMe(token,,"AndroidGroupBotMaker");
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -78,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void populateList(InputStream response) {
+        botList = new ArrayList<>();
         StringBuilder responseBld = new StringBuilder();
         BufferedReader read = new BufferedReader(new InputStreamReader(response));
         if (response == null) {
@@ -120,8 +126,18 @@ public class MainActivity extends AppCompatActivity {
             System.out.println(bo.getName());
         }
         System.out.println("*****************************************************************");
+        //SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
         ListView lv= (ListView) findViewById(R.id.bot_list);
         lv.setAdapter(adapter);
+        lv.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                GroupMeBot bot = botList.get(position);
+                startActivityForResult(new Intent(getApplicationContext(), InfoActivity.class).putExtra("groupmebot",bot),Activity.RESULT_OK);
+            }
+
+        });
 
     }
 

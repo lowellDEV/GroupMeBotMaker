@@ -1,10 +1,15 @@
 package comlowelldev.github.groupmebotmaker;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,7 +27,7 @@ import org.json.JSONArray;
  *
  * @author LowellDev
  */
-public class GroupMeBot {
+public class GroupMeBot implements Parcelable{
 
     private String name;
     private String botID;
@@ -237,10 +242,54 @@ public class GroupMeBot {
             this.addTerm(term);
         }
     }
+
+    public String[] getTerms() {
+        return (searchTerms.toArray(new String[searchTerms.size()]));
+    }
+
     @Override
     public String toString(){
         return(name+"\n"+groupName);
     }
 
+/**Very Android specific**/
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeStringList(searchTerms);
+        dest.writeString(botID);
+        dest.writeString(name);
+        dest.writeString(groupName);
+        dest.writeString(groupID);
+        dest.writeString(callBackURL);
+        dest.writeString(avatarURL);
+        dest.writeValue(DMNotification);
+    }
+    private GroupMeBot(Parcel in){
+        this.searchTerms= in.createStringArrayList();
+        botID = in.readString();
+        name=in.readString();
+        groupName=in.readString();
+        groupID= in.readString();
+        callBackURL= in.readString();
+        avatarURL=in.readString();
+        DMNotification= (Boolean) in.readValue(null);
+    }
+    public static final Parcelable.Creator<GroupMeBot> CREATOR = new Parcelable.Creator<GroupMeBot>() {
+
+        @Override
+        public GroupMeBot createFromParcel(Parcel source) {
+            return new GroupMeBot(source);
+        }
+
+        @Override
+        public GroupMeBot[] newArray(int size) {
+            return new GroupMeBot[size];
+        }
+    };
 
 }

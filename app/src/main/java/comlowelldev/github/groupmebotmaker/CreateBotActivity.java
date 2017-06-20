@@ -27,7 +27,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -53,13 +56,19 @@ import java.util.logging.Logger;
             InputStream response =HTTP.sendGET(GroupMe.baseURL+"/groups",new JSONObject().put("token",token));
             populateList(response);
             //System.out.print(groupID);
-            EditText botTerms=(EditText) findViewById(R.id.termsEditText);
+            final EditText botTerms=(EditText) findViewById(R.id.termsEditText);
             botTerms.setOnFocusChangeListener(new OnFocusChangeListener() {
                   @Override
                   public void onFocusChange(View v, boolean hasFocus) {
+                      System.out.println("WOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
+                      System.out.println(botTerms.getText().toString());
                       EditText text1  = (EditText) v;
-                      String temp =text1.getText().toString();
+                      String temp =botTerms.getText().toString();
                       terms =temp.split(",");
+                      for(String t :terms){
+                          System.out.println(t);
+                      }
+                      System.out.println("WOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
                       runCheck();
 
                   }
@@ -97,7 +106,25 @@ import java.util.logging.Logger;
             e.printStackTrace();
         }
     }
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.createButton:
+                GroupMeBot bot =GroupMeBot.createBot(token,botName,groupID);
+                if(bot!=null){
+                    bot.addTerms(terms);
+                    PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit().putStringSet(bot.getBotID(),new HashSet<String>(Arrays.asList(terms))).apply();
+                    System.out.println(bot);
+                }else{
+                    System.err.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Bot Creation Failed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                }
+                finish();
+                break;
 
+            default:
+                System.err.println("rouge onclick");
+        }
+    }
     private void runCheck() {
         if(groupID!=""&& groupID!=null){
             if(terms!=null){
@@ -160,33 +187,6 @@ import java.util.logging.Logger;
 
     }
 
-    @Override
-    public void onClick(View v) {
-       switch (v.getId()){
-           case R.id.createButton:
-               GroupMeBot bot =GroupMeBot.createBot(token,botName,groupID);
-               if(bot!=null){
-                   bot.addTerms(terms);
-                   System.out.println(bot);
-               }else{
-                   System.err.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Bot Creation Failed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-               }
-               finish();
-               break;
-           case R.id.termsEditText:
-               EditText text1  = (EditText) v;
-               String temp =text1.getText().toString();
-               terms =temp.split(",");
-               runCheck();
-               break;
-           case R.id.nameEditText:
-               EditText text2  = (EditText) v;
-               botName =text2.getText().toString();
-               runCheck();
-               break;
-           default:
-               System.err.println("rouge onclick");
-        }
-    }
+
 
 }
