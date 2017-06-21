@@ -1,4 +1,4 @@
 # GroupMeBotMaker
-VERY much in progress,
-an in-progress app to create bots in groupme
-NOT FUNCTIONAL ...yet
+VERY much in progress<br>
+an app to create bots in groupme<br>
+NOT FUNCTIONAL <br>
